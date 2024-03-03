@@ -1,31 +1,45 @@
-const express=require("express");    
+import express from "express";
 const app=express();
-import fs,{write} from "node:fs";
+import fs from "node:fs";
 import { nanoid } from "nanoid";
-app.use(express.json());
+import bodyParser from "body-parser";
+import { fileURLToPath } from "node:url";
+import path from "node:path";
 
+const __filename = fileURLToPath(import.meta.url);
+const __dirname =  path.dirname(__filename);
+app.use(express.json());
+app.use(bodyParser.urlencoded({extended:true}));
+
+app.get("/",(req,res)=>{
+    res.sendFile(__dirname+"/index.html")
+})
 const writeFiles=(ele)=>{
-    fs.writeFiles("records.json",ele);
+    fs.writeFileSync("records.json",ele);
 }
 
 app.post("/urlShortner",(req,res)=>{
-    const url=req.body.url;
-    console.log(url);
-
+    const LongURL=req.body.url;
+    const shortURL=nanoid(5);
     const info=fs.readFileSync('records.json');
     let urlData=JSON.parse(info.toString());
 
-    urlData[shortURL]=url;
+    urlData[shortURL]=LongURL;
 
-    writeFile(JSON.stringify(urlData));
+    writeFiles(JSON.stringify(urlData));
     res.json({
         success:true,
-        shortURL:`https://localhost:5000/${shortURL}`
+        shortURL:`http://localhost:5000/${shortURL}`
     })
 })
 
-app.get("./shortURL",(req,res)=>{
-    
+app.get("/:shortURL",(req,res)=>{
+    console.log(req.params.shortURL);
+    const record=fs.readFileSync("records.json")  
+    const data=JSON.parse(record.toString());
+    if(data[req.params.shortURL]){
+        return res.redirect(data[req.params.shortURL]);
+    }
 })
 app.listen(5000,()=>{
     console.log("Server is running");
