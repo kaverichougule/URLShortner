@@ -29,7 +29,7 @@ app.post("/urlShortner",(req,res)=>{
     writeFiles(JSON.stringify(urlData));
     res.json({
         success:true,
-        shortURL:`http://localhost:5000/${shortURL}`
+        shortURL:`https://urlshortner-6iab.onrender.com/${shortURL}`
     })
 })
 
